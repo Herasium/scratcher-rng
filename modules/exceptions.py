@@ -1,0 +1,3 @@
+
+class FailedWebsocketConnection(Exception):
+    pass
