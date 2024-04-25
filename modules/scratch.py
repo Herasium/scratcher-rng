@@ -12,6 +12,14 @@ from .exceptions import *
 import scratchattach
 from __main__ import proxies as proxy_list
 
+chars = [
+    '','','','','','','','','','',
+    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+    'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ', ';', ':', '!', '?', '.', '/', '&',
+    '"',"'", '#', '[', '(', ')', ']', '=', '+', '*', '-', '_', ',', '{', '}',"\\"
+]
+
+
 headers = {
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36',
     "x-csrftoken": "a",
@@ -60,6 +68,27 @@ class Request():
         self.var = data["name"].split("☁")[1]
         self.type = data["verb"]
 
+class Encoder():
+    def encode(self,string):
+        string = str.lower(string)
+        result = ""
+        for char in string: result += str(chars.index(char))
+        return result
+    def decode(self, string):
+        count = 0
+        string = str(string)
+        result = [""]
+        for count in range(0, len(string), 2):
+            current = string[count:count+2]  
+            id = chars[int(current)]
+            if id == "\\":
+                result.append("") 
+            else:
+                result[-1] += id 
+        return result
+
+
+
 class ScratchProject():
     def __init__(self,project_id,account: Account):
         self.project_id = project_id
@@ -68,7 +97,6 @@ class ScratchProject():
         self.session_id = account.session_id
         self.acc = scratchattach.Session(session_id=self.session_id,username=self.username)
         self.request_cache = TTLCache(maxsize=128, ttl=600)
-        self.conn = self.acc.connect_cloud(self.project_id)
         self.proxies = proxy_list
         self.encoder = scratchattach.encoder.Encoding
 
@@ -87,12 +115,11 @@ class ScratchProject():
                             self.request_cache[hash] = True
                             self.on_event_func(new)
             except Exception as e:
-                pass
+                print(e)
 
             time.sleep(0.1)
     def send(self,var,data):
-        try:
-            self.conn.set_var(var,int(data))
-        except:
-            self.conn.set_var(var,self.encoder.encode(data))
+        self.conn = self.acc.connect_cloud(self.project_id)
+        self.conn.set_var(var,int(data))
+        self.conn.disconnect()
 

@@ -11,6 +11,11 @@ import threading
 from proxy import ProxyScraper
 from flask import Flask
 from tqdm import tqdm
+import time
+import math
+import queue
+
+data_queue = queue.Queue()
 file_path = "accounts.txt"
 count = 0
 with open(file_path, 'r') as file:
@@ -27,7 +32,6 @@ def scan_user_followers(user,count):
     url = f'https://scratch.mit.edu/users/{user}/followers/'
     page = 1
     ids = [user]
-    buffer.pop(0)
     already.append(user)
     sc = count
     count += 1
@@ -59,11 +63,29 @@ def scan_user_followers(user,count):
 def run_loop(count):
     while True:
         try:
-            count = scan_user_followers(buffer[0],count)
+            start_time = time.time()
+            count = scan_user_followers(,count)
+            if count == False:
+                raise("Finish")
+            end_time = time.time()
+            if (end_time-start_time) < 1:
+                time.sleep(1-(end_time-start_time))
+            data_queue.put(count)
         except Exception as e:
            print(e)
-            
-run_loop(count)
+
+
+
+with tqdm() as pbar:
+    for i in range(10):
+        a = threading.Thread(target=run_loop,args=(i+1,))
+        a.start()
+    while True:
+        try:
+            data = data_queue.get(block=False)
+            pbar.update(1)
+        except queue.Empty:
+            pass
 
 while True:
     pass

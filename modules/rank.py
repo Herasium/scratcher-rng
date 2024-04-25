@@ -207,82 +207,87 @@ rewards = {
 # Function to get score
 def get_score(user):
     stats = get_user_stats(user)
+    
     meta_data = get_meta_data(user)
     score = 0
     rewarded_texts = []  # List to store rewarded texts
-
+    
     # Function to reward points
     def reward_points(points, reward_text):
         nonlocal score
+        
         score += points
         rewarded_texts.append(reward_text)
 
     # Calculate score based on followers
     s = 1
+    
     for threshold, points in scores["followers"].items():
         if stats["followers"] >= threshold:
-            reward_points(points, rewards[s])
+            reward_points(points, s)
         s+=1
 
     # Calculate score based on views
     for threshold, points in scores["views"].items():
         if stats["views"] >= threshold:
-            reward_points(points, rewards[s])
+            reward_points(points, s)
         s+=1
     # Calculate score based on likes
     for threshold, points in scores["likes"].items():
         if stats["favorites"] >= threshold:
-            reward_points(points, rewards[s])
+            reward_points(points, s)
         s+=1
     # Calculate score based on favorites
     for threshold, points in scores["favorites"].items():
         if stats["favorites"] >= threshold:
-             reward_points(points, rewards[s])
+             reward_points(points, s)
         s+=1
     # Calculate score based on remixes
     for threshold, points in scores["remixes"].items():
         if stats["remixes"] >= threshold:
-            reward_points(points, rewards[s])
+            reward_points(points, s)
         s+=1
     # Add country-specific score
     if meta_data["country"] == "France":
-        reward_points(scores["country"], rewards[24])
+        reward_points(scores["country"], 24)
 
     # Add admin score
     if meta_data["admin"]:
-        reward_points(scores["admin"], rewards[32])
+        reward_points(scores["admin"], 32)
 
     # Additional scoring based on project IDs and join date
-    if meta_data:
-        if meta_data["id"] >= 10000000:
-            reward_points(scores["id"][10000000], rewards[25])
-        elif meta_data["id"] >= 1000000:
-            reward_points(scores["id"][1000000], rewards[26])
-        elif meta_data["id"] >= 1000:
-            reward_points(scores["id"][1000], rewards[27])
-        elif meta_data["id"] >= 100:
-            reward_points(scores["id"][100], rewards[28])
-
-        join_date = datetime.strptime(meta_data["joined"], "%Y-%m-%dT%H:%M:%S.%fZ")
-        if join_date <= (datetime.now() - timedelta(days=5*365)):
-            reward_points(scores["join_date"][5], rewards[29])
-        elif join_date <= (datetime.now() - timedelta(days=10*365)):
-            reward_points(scores["join_date"][10], rewards[30])
-        elif join_date <= (datetime.now() - timedelta(days=15*365)):
-            reward_points(scores["join_date"][15], rewards[31])
-
+    
+    
+    if meta_data["id"] >= 10000000:
+            reward_points(scores["id"][10000000], 25)
+    elif meta_data["id"] >= 1000000:
+            reward_points(scores["id"][1000000], 26)
+    elif meta_data["id"] >= 1000:
+            reward_points(scores["id"][1000], 27)
+    elif meta_data["id"] >= 100:
+            reward_points(scores["id"][100], 28)
+    
+    join_date = datetime.strptime(meta_data["joined"], "%Y-%m-%dT%H:%M:%S.%fZ")
+    if join_date <= (datetime.now() - timedelta(days=5*365)):
+            reward_points(scores["join_date"][5], 29)
+    elif join_date <= (datetime.now() - timedelta(days=10*365)):
+            reward_points(scores["join_date"][10], 30)
+    elif join_date <= (datetime.now() - timedelta(days=15*365)):
+            reward_points(scores["join_date"][15], 31)
+    
+    
     return score, rewarded_texts
 
 def get_rank(score):
-    if score >= 250:
+    if score >= 200:
         return "S"
-    elif score >= 200:
-        return "A"
     elif score >= 150:
-        return "B"
+        return "A"
     elif score >= 100:
-        return "C"
+        return "B"
     elif score >= 50:
+        return "C"
+    elif score >= 20:
         return "D"
     elif score >= 0:
         return "F"
