@@ -98,7 +98,6 @@ class ScratchProject():
         self.acc = scratchattach.Session(session_id=self.session_id,username=self.username)
         self.request_cache = TTLCache(maxsize=128, ttl=600)
         self.proxies = proxy_list
-        self.encoder = scratchattach.encoder.Encoding
 
     def on_event(self,function):
         self.on_event_func = function
@@ -117,7 +116,7 @@ class ScratchProject():
             except Exception as e:
                 print(e)
 
-            time.sleep(0.1)
+            time.sleep(0.15)
     def send(self,var,data):
         self.conn = self.acc.connect_cloud(self.project_id)
         self.conn.set_var(var,int(data))

@@ -1,0 +1,9 @@
+bs4
+cachetools
+firebase-admin
+Flask
+Pillow
+requests
+scratchattach
+tqdm
+websocket-client

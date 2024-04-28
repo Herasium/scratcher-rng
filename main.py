@@ -1,6 +1,5 @@
 import modules.proxy as proxy
 import random
-import time
 
 logo = '''
 ╔═╗┌─┐┬─┐┌─┐┌┬┐┌─┐┬ ┬┌─┐┬─┐  ╦═╗┌┐┌┌─┐
@@ -18,17 +17,14 @@ import modules.image as image
 import modules.rank as rank
 import modules.user as users
 
-account = scratch.Account("herasium","")
+account = scratch.Account("ScratcherRng","")
 project = scratch.ScratchProject(1003965733,account)
 
 def send_user_pp(user):
     img = image.get_user_image(user)
     project.send("img_1",img[0])
-    time.sleep(0.1)
     project.send("img_2",img[1])
-    time.sleep(0.1)
     project.send("img_3",img[2])
-    time.sleep(0.1)
     project.send("img_user",scratch.Encoder().encode(user))
 
 var_list = [
@@ -43,13 +39,12 @@ def on_event(request: scratch.Request):
     parsed = scratch.Encoder().decode(request.data)
     if parsed[1] == "open":
         user = users.random_user()
+        print("Requested user",user)
         uclass = rank.User(user)
         score = uclass.get_score()
         var="server_"+str(random.randint(1,3))
-        print(user,var,len(scratch.Encoder().encode(str(parsed[0])+"\\"+user+"\\"+str(score.score)+"\\"+score.rank+"\\"+str(score.texts))))
-        time.sleep(0.3)
+        print("Sent user",user)
         project.send(var,scratch.Encoder().encode(str(parsed[0])+"\\"+user+"\\"+str(score.score)+"\\"+score.rank+"\\"+str(score.texts)))
-        time.sleep(0.1)
         send_user_pp(user)
 
 

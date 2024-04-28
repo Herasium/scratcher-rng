@@ -59,12 +59,12 @@ def scan_user_followers(user,count):
             file.write(id+";")
     print(f"Added user {user}, new count: {count} (+{count-sc})")
     return count
-
+ 
 def run_loop(count):
     while True:
         try:
             start_time = time.time()
-            count = scan_user_followers(,count)
+            count = scan_user_followers(user,count)
             if count == False:
                 raise("Finish")
             end_time = time.time()

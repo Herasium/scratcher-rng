@@ -6,6 +6,9 @@ from tqdm import tqdm
 import json
 import re 
 from datetime import datetime, timedelta
+import queue
+import time
+from threading import Thread,current_thread
 
 proxy_list = proxies
 
@@ -31,22 +34,45 @@ def scan_all_users_project(user):
         page += 1
     return ids
 
+
+def request_projects(user, project_list, stats):
+    for project_id in project_list:
+        try:
+            response = requests.get(f"https://api.scratch.mit.edu/projects/{project_id}")
+            data = response.json()["stats"]
+            stats["favorites"] += data["favorites"]
+            stats["loves"] += data["loves"]
+            stats["remixes"] += data["remixes"]
+            stats["views"] += data["views"]
+        except Exception as e:
+            print("Error:", e, current_thread().name)
+
 def get_user_stats(user):
     projects = scan_all_users_project(user)
     stats = {
-        "favorites":0,
-        "loves":0,
-        "remixes":0,
-        "views":0,
-        "followers":get_followers(user)
+        "favorites": 0,
+        "loves": 0,
+        "remixes": 0,
+        "views": 0,
+        "followers": get_followers(user)
     }
-    for id in tqdm(projects, leave=False):
-        response = requests.get(f"https://api.scratch.mit.edu/projects/{id}",proxies=random.choice(proxy_list))
-        data = response.json()["stats"]
-        stats["loves"] += data["loves"]
-        stats["favorites"] += data["favorites"]
-        stats["remixes"] += data["remixes"]
-        stats["views"] += data["views"]
+    thread = 0
+    lists = [[] for _ in range(10)]
+
+    for project_id in projects:
+        if thread > 9:
+            thread = 0
+        lists[thread].append(project_id)
+        thread += 1
+    print("Dispateched",len(projects),f"projects in 10 threads ({len(lists[0])} each)")
+    threads = []
+    for i in range(10):
+        thread = Thread(target=request_projects, args=(user, lists[i], stats))
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
     return stats
 
 def get_meta_data(user):
